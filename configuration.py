@@ -6,6 +6,7 @@ import imp
 import os
 import inspect
 
+# TODO: add all the defaults
 DEFAULTS = [
     ('analyse_f0', True),
     ('analyse_int', True),
@@ -13,8 +14,7 @@ DEFAULTS = [
     ('analyse_rate', True),
     ('analyse_voc', True),
     ('analyse_pau', True),
-    ('stats_sample', ''),
-    ('stats_corpora', ''),
+    ('wavs', ''),
     ('use_gender', ''),
     ('use_align', '')
     ]

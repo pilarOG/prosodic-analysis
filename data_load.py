@@ -3,5 +3,5 @@
 import parselmouth
 
 
-def load_wave(path):
-    return parselmouth.Sound(path)
+def load_wave(filepath):
+    return parselmouth.Sound(filepath)
