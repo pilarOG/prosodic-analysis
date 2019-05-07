@@ -1,1 +1,2 @@
 praat-parselmouth-0.3.2
+numpy
