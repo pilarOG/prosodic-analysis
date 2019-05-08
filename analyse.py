@@ -94,16 +94,17 @@ settings = load_config(opts.config)
 
 # Analysis of each sample
 for filepath in os.listdir(settings.corpora):
-    wav = load_wave(settings.corpora+'/'+filepath)
-    analysis = ProsodicAnalysis(wav, settings, filepath)
+    if '.wav' in filepath:
+        wav = load_wave(settings.corpora+'/'+filepath)
+        analysis = ProsodicAnalysis(wav, settings, filepath)
 
-    if settings.analyse_f0: #TODO: give a choice about pitch tracker, or to use them all, compare them, and maybe tell the best one for that data
-        analysis.set_pitch_analysis(extract_pitch(analysis.wav, settings))
-        #print dir(analysis.pitch_analysis)
+        if settings.analyse_f0: #TODO: give a choice about pitch tracker, or to use them all, compare them, and maybe tell the best one for that data
+            analysis.set_pitch_analysis(extract_pitch(analysis.wav, settings))
+            #print dir(analysis.pitch_analysis)
 
-    if settings.analyse_int:
-        analysis.set_intensity_analysis(extract_intensity(analysis.wav, settings), extract_mfccs(wavfile.read(settings.corpora+'/'+filepath), settings))
-        #print dir(analysis.intensity_analysis)
+        if settings.analyse_int:
+            analysis.set_intensity_analysis(extract_intensity(analysis.wav, settings), extract_mfccs(wavfile.read(settings.corpora+'/'+filepath), settings))
+            #print dir(analysis.intensity_analysis)
 
 # Plot corpus stats
 # plot_stats([(list(np.concatenate(pitch_values)), 'pitch values')], settings)
