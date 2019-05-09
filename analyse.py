@@ -3,16 +3,17 @@
 from argparse import ArgumentParser
 from configuration import load_config
 from data_load import load_wave
-from utils import extract_pitch, extract_intensity, extract_mfccs, draw_pitch, draw_intens, draw_zcoef, plot_stats, get_stats
+from utils import extract_pitch, extract_intensity, extract_mfccs, extract_intervals, extract_harmonics, draw_pitch, draw_intens, draw_harmonic, draw_zcoef, plot_stats, get_stats
 import numpy as np
 import os
 import pysptk
 from scipy.io import wavfile
+import matplotlib.pyplot as plt
 #np.set_printoptions(threshold=np.inf)
 
 #TODO: what would be the point of accumulating mean, min and max? think about how to show it
 mean_pitch, max_pitch, min_pitch, std_pitch, perc_voiced, pitch_values = [], [], [], [], [], [] # Only leave those we'll use for stats
-intens_values, zcoef_values = [], []
+intens_values, zcoef_values, duration_values, silence_values, harmonic_values = [], [], [], [], []
 
 class ProsodicAnalysis():
 
@@ -52,7 +53,7 @@ class ProsodicAnalysis():
     def set_intensity_analysis(self, intensity_analysis, zero_coefs_analysis):
         self.intensity_analysis = intensity_analysis
         # Intensity countour
-        self.intens_countour = intensity_analysis.values.T
+        self.intens_countour = [n[0] for n in intensity_analysis.values.T]
         self.intens_countour[self.intens_countour==0] = np.nan
         intens_values.append(self.intens_countour)
         # General stats #TODO: add the general stats to each plot
@@ -67,22 +68,32 @@ class ProsodicAnalysis():
         # Plot coefficient
         draw_zcoef(self.zero_coefs_analysis, len(self.zero_coefs_analysis), settings, filepath)
 
-# Features to extract
+    # 3) Duration: values (without silences), pause duration, speech/silence ratio
+    def set_duration_analysis(self, duration_analysis, silence_analysis):
+        self.duration_analysis = duration_analysis
+        self.silence_analysis = silence_analysis
+        self.ratio_speech_silence = duration_analysis // silence_analysis
+        duration_values.append(self.duration_analysis)
+        silence_values.append(self.silence_analysis)
 
-# 3) Duration: range, mean (without silences), standard deviation
-# 4) Speech rate: units per second
-# 5) Vocal quality: HNR, glottal source open quotient
-# 6) Pause: mean duration, range duration, pauses per second, ratio of pauses/speech
+    #TODO: I would like to add here a model that can detect the center of a vowel to get an unsupervised speech rate
 
+    # 4) Voice quality: HNR
+    def set_harmonic_analysis(self, harmonic_analysis):
+        self.harmonic_analysis = harmonic_analysis
+        # Intensity countour
+        self.harmonic_countour = [n[0] for n in harmonic_analysis.values.T]
+        self.harmonic_countour[self.harmonic_countour==0] = np.nan
+        harmonic_values.append(self.harmonic_countour)
+        # Plot harmonics
+        draw_harmonic(self.harmonic_countour, harmonic_analysis.xs(), settings, filepath)
 
-# Two modes:
-# 1) Collect statistics per sample
-# 2) or collect statistics for a full corpus
-
-
-# Two extra options:
+# Future extra options:
 # 1) Include gender information
 # 2) Include alignments
+# 3) Include speaker labels
+# 4) Include through time analysis
+
 
 #### MAIN ####
 
@@ -96,6 +107,7 @@ settings = load_config(opts.config)
 for filepath in os.listdir(settings.corpora):
     if '.wav' in filepath:
         wav = load_wave(settings.corpora+'/'+filepath)
+
         analysis = ProsodicAnalysis(wav, settings, filepath)
 
         if settings.analyse_f0: #TODO: give a choice about pitch tracker, or to use them all, compare them, and maybe tell the best one for that data
@@ -106,6 +118,18 @@ for filepath in os.listdir(settings.corpora):
             analysis.set_intensity_analysis(extract_intensity(analysis.wav, settings), extract_mfccs(wavfile.read(settings.corpora+'/'+filepath), settings))
             #print dir(analysis.intensity_analysis)
 
+        if settings.analyse_dur:
+            durations, silences = extract_intervals(analysis.wav)
+            analysis.set_duration_analysis(durations, silences)
+
+        if settings.analyse_voc:
+            analysis.set_harmonic_analysis(extract_harmonics(analysis.wav))
+
 # Plot corpus stats
-# plot_stats([(list(np.concatenate(pitch_values)), 'pitch values')], settings)
-# plot_stats([(list(np.concatenate(intens_values)), 'pitch values')], settings)
+
+
+plot_stats(list(np.concatenate(pitch_values)), 'pitch values', settings)
+plot_stats(list(np.concatenate(intens_values)), 'intensity values', settings) # Concatenate values of all samples
+plot_stats(duration_values, 'duration values', settings)
+plot_stats(silence_values, 'silence values', settings)
+plot_stats(list(np.concatenate(intens_values)), 'harmonic values', settings)
