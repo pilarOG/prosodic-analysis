@@ -36,10 +36,10 @@ For each sentence, the outputs are:
 - HNR (in dB) plots for each sentence.
 
 For the corpora, the outputs are:
-- Plot of the distribution of fundamental frequency (in Hz) values.
-- Plot of the distribution of intensity (in dB) values.
-- Plot of the distribution of duration of speech segments (in seconds) values.
-- Plot of the distribution of duration of silence segments (in seconds) values.
-- Plot of the distribution of HNR (in dB) values.
+- Normalized histogram of the distribution of fundamental frequency (in Hz) values.
+- Normalized histogram of the distribution of intensity (in dB) values.
+- Normalized histogram of the distribution of duration of speech segments (in seconds) values.
+- Normalized histogram of the distribution of duration of silence segments (in seconds) values.
+- Normalized histogram of the distribution of HNR (in dB) values.
 
 
