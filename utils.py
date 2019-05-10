@@ -6,7 +6,6 @@ import parselmouth
 import matplotlib.pyplot as plt
 import pysptk
 import matplotlib.mlab as mlab
-from scipy.optimize import curve_fit
 
 # TODO: extract features as a different step to not repeat?
 

@@ -9,14 +9,16 @@ import inspect
 # TODO: add all the defaults
 DEFAULTS = [
     ('analyse_f0', True),
+    ('pitch_ceiling', 300),
+    ('pitch_floor', 50),
+    ('smooth_bandwidth', 100),
     ('analyse_int', True),
+    ('frame_length', 1024),
     ('analyse_dur', True),
-    ('analyse_rate', True),
+    ('analyse_rate', False),
     ('analyse_voc', True),
-    ('analyse_pau', True),
-    ('wavs', ''),
-    ('use_gender', ''),
-    ('use_align', '')
+    ('corpora', ''),
+    ('save_plots', '')
     ]
 
 class Config(object):
@@ -38,4 +40,6 @@ def load_config(config_fname):
     config_file = imp.load_source('config', config)
     settings = Config(config_file)
     settings.validate()
+    assert os.path.exists(settings.corpora), 'Wav folder %s does not exist'%(settings.corpora)
+    assert os.path.exists(settings.save_plots), 'Plot folder file %s does not exist'%(settings.save_plots)
     return settings

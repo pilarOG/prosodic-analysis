@@ -75,12 +75,6 @@ class ProsodicAnalysis():
         harmonic_values.append(self.harmonic_countour)
         draw_harmonic(self.harmonic_countour, harmonic_analysis.xs(), settings, filepath)
 
-# Future extra options:
-# 1) Include gender information
-# 2) Include alignments
-# 3) Include speaker labels
-# 4) Include through time analysis
-
 
 #### MAIN ####
 
@@ -92,6 +86,7 @@ settings = load_config(opts.config)
 # Analysis of each sample
 for filepath in os.listdir(settings.corpora):
     if '.wav' in filepath:
+
         wav = load_wave(settings.corpora+'/'+filepath)
 
         analysis = ProsodicAnalysis(wav, settings, filepath)
@@ -116,4 +111,9 @@ plot_stats(duration_values, 'Duration (s)', settings)
 plot_stats(silence_values, 'Silence (s)', settings)
 plot_stats(list(np.concatenate(harmonic_values)), 'HNR (dB)', settings)
 
-#TODO: table of means and other stats
+#TODO: extra information
+# Future extra options:
+# 1) Include gender information
+# 2) Include alignments
+# 3) Include speaker labels
+# 4) Include through time analysis
