@@ -22,9 +22,10 @@ To use the script you only need to modify the config.cfg file. This file contain
 python analyse.py -c config.cfg
 ```
 
+The script runs 4 kinds of analysis (which can be turned on or off in the config file): pitch, duration (of speech and pauses seprately), intensity and harmonic-to-noise ratio.
+
 # Output
 
-The script runs 4 kinds of analysis (which can be turned on or off in the config file): pitch, duration (of speech and pauses seprately), intensity and harmonic-to-noise ratio.
 Analysis are run both for each sentence and for the whole corpora.
 
 One of the datasets I will use here to examplify is the LJ dataset that you can find here: https://keithito.com/LJ-Speech-Dataset/
@@ -48,4 +49,14 @@ For the corpora, the outputs are:
 - Normalized histogram of the distribution of duration of silence segments (in seconds) values.
 - Normalized histogram of the distribution of HNR (in dB) values.
 
+These plots might allow a quick comparison between two corpora. For example, here there is a comparison of the general stats of 300 sentences from LJ-speech and 278 sentences (chapter 50) by me (Chilean Spanish plots). Although the number of sentences is similar, you'll see that LJ sentences can be much longer than mine (it's audiobook data, while my are prompts designed for unit selection TTS), this can be seen in the distribution of duration. Also, although both are females, my speech was intended to be neutral, while LJ is more expressive, which can be seen in the distribution of fundamental frequency. Finally, LJ is an American English speaker, while I'm a Chilean Spanish speaker.
 
+![](plots/chilean_stats_Duration.png)  |  ![](plots/LJ_stats_Duration.png)
+:-------------------------:|:-------------------------:
+![](plots/chilean_stats_Fundamental.png)  |  ![](plots/LJ_stats_Fundamental.png)
+:-------------------------:|:-------------------------:
+![](plots/chilean_stats_Intensity.png)  |  ![](plots/LJ_stats_Intensity.png)
+:-------------------------:|:-------------------------:
+![](plots/chilean_stats_Silence.png)  |  ![](plots/LJ_stats_Silence.png)
+:-------------------------:|:-------------------------:
+![](plots/chilean_stats_HNR.png)  |  ![](plots/LJ_stats_HNR.png)
