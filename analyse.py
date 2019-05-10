@@ -9,7 +9,7 @@ import os
 import pysptk
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-
+from tqdm import tqdm
 
 #TODO: what would be the point of accumulating mean, min and max? think about how to show it
 perc_voiced, pitch_values, silence_values, harmonic_values = [], [], [], [] # Only leave those we'll use for stats
@@ -82,11 +82,10 @@ opts = a.parse_args()
 settings = load_config(opts.config)
 
 # Analysis of each sample
-for filepath in os.listdir(settings.corpora):
+for filepath in tqdm(os.listdir(settings.corpora)):
     if '.wav' in filepath:
 
         wav = load_wave(settings.corpora+'/'+filepath)
-
         analysis = ProsodicAnalysis(wav, settings, filepath)
 
         if settings.analyse_f0: #TODO: give a choice about pitch tracker, or to use them all, compare them, and maybe tell the best one for that data

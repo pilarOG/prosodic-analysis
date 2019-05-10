@@ -28,9 +28,15 @@ def extract_mfccs(waveform, settings):
 def extract_intervals(waveform):
     text_grid = parselmouth.praat.call(waveform, "To TextGrid (silences)", 100, 0.0, -25.0, 0.1, 0.1, 'silent', 'sounding')
     soundings = parselmouth.praat.call([text_grid, waveform], "Extract intervals where", 1, False, 'is equal to','sounding')
-    duration = sum([sound.duration for sound in soundings])
     silences = parselmouth.praat.call([text_grid, waveform], "Extract intervals where", 1, False, 'is equal to','silent')
-    pauses = sum([silence.duration for silence in silences])
+    if type(soundings) == list:
+        duration = sum([sound.duration for sound in soundings])
+    else: #If only one interval found
+        duration = soundings.duration
+    if type(silences) == list:
+        pauses = sum([silence.duration for silence in silences])
+    else:
+        pauses = silences.duration
     return duration, pauses
 
 def extract_harmonics(waveform):
@@ -97,4 +103,4 @@ def plot_stats(indicator, name, settings, bins=25):
     y = mlab.normpdf(bins, np.nanmean(values), np.nanstd(values))
     plt.plot(bins, y, 'r--')
     # Save plot
-    plt.savefig(settings.save_plots+'/stats_'+name.split()[0]+'.png')
+    plt.savefig(settings.save_plots+'/'+settings.title+'_stats_'+name.split()[0]+'.png')
