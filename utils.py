@@ -4,8 +4,11 @@
 import numpy as np
 import parselmouth
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pysptk
+import matplotlib.mlab as mlab
+from scipy.optimize import curve_fit
+
+# TODO: extract features as a different step to not repeat?
 
 def extract_pitch(waveform, settings):
     return waveform.to_pitch(pitch_ceiling=settings.pitch_ceiling, pitch_floor=settings.pitch_floor)
@@ -65,15 +68,22 @@ def draw_harmonic(harmonic_values, xaxis, settings, filepath):
     plt.plot(xaxis, harmonic_values)
     plt.savefig(settings.save_plots+'/harmonic_'+filepath.replace('wav', 'png'))
 
-def get_stats(values):
-    values[values==0] = np.nan
-    return np.nanmean(values), np.nanmin(values), np.nanmax(values), np.nanstd(values)
-
 def plot_stats(indicator, name, settings, bins=25):
     plt.clf()
     values = [x for x in indicator if ~np.isnan(x)]
-    plt.xlim(min(values), max(values))
-    plt.ylim(0, len(values)/2)
-    plt.hist(values, bins=25)
-    plt.xlabel(name)
-    plt.savefig(settings.save_plots+'/stats_'+name+'.png')
+    # Plot histogram
+    minv = min(values)
+    if minv < 0: minv = 0
+    plt.xlim(minv, max(values))
+    n, bins, _ = plt.hist(values, bins='auto', normed=1)
+    plt.ylim(0, max(n))
+    # Mean line
+    values = [x for x in indicator if x > 0]
+    plt.axvline(np.nanmean(values), color='k', linestyle='dashed', linewidth=1)
+    plt.ylabel('Normalized frequency')
+    plt.xlabel(name.split()[0])
+    # Distribution fit
+    y = mlab.normpdf(bins, np.nanmean(values), np.nanstd(values))
+    plt.plot(bins, y, 'r--')
+    # Save plot
+    plt.savefig(settings.save_plots+'/stats_'+name.split()[0]+'.png')

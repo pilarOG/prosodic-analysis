@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from configuration import load_config
 from data_load import load_wave
-from utils import extract_pitch, extract_intensity, extract_mfccs, extract_intervals, extract_harmonics, draw_pitch, draw_intens, draw_harmonic, draw_zcoef, plot_stats, get_stats
+from utils import extract_pitch, extract_intensity, extract_mfccs, extract_intervals, extract_harmonics, draw_pitch, draw_intens, draw_harmonic, draw_zcoef, plot_stats
 import numpy as np
 import os
 import pysptk
@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 #np.set_printoptions(threshold=np.inf)
 
 #TODO: what would be the point of accumulating mean, min and max? think about how to show it
-mean_pitch, max_pitch, min_pitch, std_pitch, perc_voiced, pitch_values = [], [], [], [], [], [] # Only leave those we'll use for stats
-intens_values, zcoef_values, duration_values, silence_values, harmonic_values = [], [], [], [], []
+perc_voiced, pitch_values, silence_values, harmonic_values = [], [], [], [] # Only leave those we'll use for stats
+intens_values, zcoef_values, duration_values = [], [], []
 
 class ProsodicAnalysis():
 
@@ -30,11 +30,7 @@ class ProsodicAnalysis():
         self.pitch_countour = pitch_analysis.selected_array['frequency']
         self.pitch_countour[self.pitch_countour==0] = np.nan
         pitch_values.append(self.pitch_countour)
-        # Get plot of the contour
         draw_pitch(self.pitch_countour, pitch_analysis.xs(), settings, 'original', filepath)
-        # General stats
-        self.mean_pitch, self.min_pitch, self.max_pitch, self.std_pitch = get_stats(self.pitch_countour)
-
         # Interpolated contour
         self.interpolated = pitch_analysis.interpolate().selected_array['frequency']
         self.interpolated[self.interpolated==0] = np.nan
@@ -43,9 +39,7 @@ class ProsodicAnalysis():
         self.smoothed = pitch_analysis.smooth(bandwidth=self.settings.smooth_bandwidth).selected_array['frequency']
         self.smoothed[self.smoothed==0] = np.nan
         draw_pitch(self.smoothed, pitch_analysis.xs(), settings, 'smoothed', filepath)
-        # Pitch slope TODO: conider also get_slope_without_octave_jumps
-        self.slope_pitch = pitch_analysis.get_mean_absolute_slope()
-        # Percentage of voiced frames
+        # Percentage of voiced frames # TODO: how to plot this?
         self.perc_voiced = (pitch_analysis.count_voiced_frames() * 100) / pitch_analysis.get_number_of_frames()
         perc_voiced.append(self.perc_voiced)
 
@@ -56,16 +50,10 @@ class ProsodicAnalysis():
         self.intens_countour = [n[0] for n in intensity_analysis.values.T]
         self.intens_countour[self.intens_countour==0] = np.nan
         intens_values.append(self.intens_countour)
-        # General stats #TODO: add the general stats to each plot
-        self.mean_intens, self.min_intens, self.max_intens, self.std_intens = get_stats(self.intens_countour)
-        # Plot intensity
         draw_intens(self.intens_countour, intensity_analysis.xs(), settings, filepath)
         # Zero coefficient
         self.zero_coefs_analysis = zero_coefs_analysis
         zcoef_values.append(self.zero_coefs_analysis)
-        # General stats
-        self.mean_zcoef, self.min_zcoef, self.max_zcoef, self.std_zcoef = get_stats(self.zero_coefs_analysis)
-        # Plot coefficient
         draw_zcoef(self.zero_coefs_analysis, len(self.zero_coefs_analysis), settings, filepath)
 
     # 3) Duration: values (without silences), pause duration, speech/silence ratio
@@ -81,11 +69,10 @@ class ProsodicAnalysis():
     # 4) Voice quality: HNR
     def set_harmonic_analysis(self, harmonic_analysis):
         self.harmonic_analysis = harmonic_analysis
-        # Intensity countour
+        # HNR countour
         self.harmonic_countour = [n[0] for n in harmonic_analysis.values.T]
         self.harmonic_countour[self.harmonic_countour==0] = np.nan
         harmonic_values.append(self.harmonic_countour)
-        # Plot harmonics
         draw_harmonic(self.harmonic_countour, harmonic_analysis.xs(), settings, filepath)
 
 # Future extra options:
@@ -102,7 +89,6 @@ a.add_argument('-c', dest='config', required=True, type=str)
 opts = a.parse_args()
 settings = load_config(opts.config)
 
-
 # Analysis of each sample
 for filepath in os.listdir(settings.corpora):
     if '.wav' in filepath:
@@ -112,11 +98,9 @@ for filepath in os.listdir(settings.corpora):
 
         if settings.analyse_f0: #TODO: give a choice about pitch tracker, or to use them all, compare them, and maybe tell the best one for that data
             analysis.set_pitch_analysis(extract_pitch(analysis.wav, settings))
-            #print dir(analysis.pitch_analysis)
 
         if settings.analyse_int:
             analysis.set_intensity_analysis(extract_intensity(analysis.wav, settings), extract_mfccs(wavfile.read(settings.corpora+'/'+filepath), settings))
-            #print dir(analysis.intensity_analysis)
 
         if settings.analyse_dur:
             durations, silences = extract_intervals(analysis.wav)
@@ -126,10 +110,10 @@ for filepath in os.listdir(settings.corpora):
             analysis.set_harmonic_analysis(extract_harmonics(analysis.wav))
 
 # Plot corpus stats
+plot_stats(list(np.concatenate(pitch_values)), 'Fundamental frequency (Hz)', settings)
+plot_stats(list(np.concatenate(intens_values)), 'Intensity (dB)', settings) # Concatenate values of all samples
+plot_stats(duration_values, 'Duration (s)', settings)
+plot_stats(silence_values, 'Silence (s)', settings)
+plot_stats(list(np.concatenate(harmonic_values)), 'HNR (dB)', settings)
 
-
-plot_stats(list(np.concatenate(pitch_values)), 'pitch values', settings)
-plot_stats(list(np.concatenate(intens_values)), 'intensity values', settings) # Concatenate values of all samples
-plot_stats(duration_values, 'duration values', settings)
-plot_stats(silence_values, 'silence values', settings)
-plot_stats(list(np.concatenate(intens_values)), 'harmonic values', settings)
+#TODO: table of means and other stats
