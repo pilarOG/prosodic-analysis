@@ -9,7 +9,7 @@ import os
 import pysptk
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-#np.set_printoptions(threshold=np.inf)
+
 
 #TODO: what would be the point of accumulating mean, min and max? think about how to show it
 perc_voiced, pitch_values, silence_values, harmonic_values = [], [], [], [] # Only leave those we'll use for stats
@@ -30,15 +30,13 @@ class ProsodicAnalysis():
         self.pitch_countour = pitch_analysis.selected_array['frequency']
         self.pitch_countour[self.pitch_countour==0] = np.nan
         pitch_values.append(self.pitch_countour)
-        draw_pitch(self.pitch_countour, pitch_analysis.xs(), settings, 'original', filepath)
         # Interpolated contour
         self.interpolated = pitch_analysis.interpolate().selected_array['frequency']
         self.interpolated[self.interpolated==0] = np.nan
-        draw_pitch(self.interpolated, pitch_analysis.xs(), settings, 'interpolated', filepath)
         # Smoothed version
         self.smoothed = pitch_analysis.smooth(bandwidth=self.settings.smooth_bandwidth).selected_array['frequency']
         self.smoothed[self.smoothed==0] = np.nan
-        draw_pitch(self.smoothed, pitch_analysis.xs(), settings, 'smoothed', filepath)
+        draw_pitch(self.pitch_countour, self.smoothed, self.interpolated, pitch_analysis.xs(), settings, filepath)
         # Percentage of voiced frames # TODO: how to plot this?
         self.perc_voiced = (pitch_analysis.count_voiced_frames() * 100) / pitch_analysis.get_number_of_frames()
         perc_voiced.append(self.perc_voiced)

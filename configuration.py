@@ -18,7 +18,8 @@ DEFAULTS = [
     ('analyse_rate', False),
     ('analyse_voc', True),
     ('corpora', ''),
-    ('save_plots', '')
+    ('save_plots', ''),
+    ('title', '')
     ]
 
 class Config(object):

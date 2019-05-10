@@ -6,6 +6,7 @@ import parselmouth
 import matplotlib.pyplot as plt
 import pysptk
 import matplotlib.mlab as mlab
+plt.style.use('ggplot')
 
 # TODO: extract features as a different step to not repeat?
 
@@ -38,33 +39,43 @@ def extract_harmonics(waveform):
 #TODO: pick different colours for the different graphs
 
 # From original https://github.com/YannickJadoul/Parselmouth
-def draw_pitch(pitch_values, xaxis, settings, mode, filepath):
+def draw_pitch(pitch, smoothed, interpolated, xaxis, settings, filepath):
     plt.clf()
     plt.ylim(0, settings.pitch_ceiling)
-    plt.ylabel("fundamental frequency [Hz]")
-    plt.plot(xaxis, pitch_values)
-    plt.savefig(settings.save_plots+'/f0_'+mode+'_'+filepath.replace('wav', 'png'))
+    plt.ylabel("Fundamental Frequency (Hz)")
+    plt.xlabel("Time (s)")
+    plt.plot(xaxis, pitch, color='red', label='pitch')
+    plt.plot(xaxis, interpolated, color='purple', label='interpolated', alpha=0.5)
+    plt.plot(xaxis, smoothed, color='blue', label='smoothed')
+    plt.legend()
+    plt.title(filepath.replace('.wav', ''))
+    plt.savefig(settings.save_plots+'/f0_'+filepath.replace('wav', 'png'))
 
 def draw_intens(intens_values, xaxis, settings, filepath):
     plt.clf()
     plt.ylim(0, 120)
-    plt.ylabel("intensity [dB]")
-    plt.plot(xaxis, intens_values)
+    plt.ylabel("Intensity (dB)")
+    plt.xlabel("Time (s)")
+    plt.plot(xaxis, intens_values, color='red')
+    plt.title(filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/intens_'+filepath.replace('wav', 'png'))
 
 def draw_zcoef(coef_values, xaxis_len, settings, filepath):
     plt.clf()
     plt.ylim(0, 70)
-    plt.ylabel("zero coefficient")
-    plt.xlabel("frames")
-    plt.plot(range(0, xaxis_len), coef_values)
+    plt.ylabel("Zero Coefficient")
+    plt.xlabel("Frames")
+    plt.plot(range(0, xaxis_len), coef_values, color='orange')
+    plt.title(filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/zcoef_'+filepath.replace('wav', 'png'))
 
 def draw_harmonic(harmonic_values, xaxis, settings, filepath):
     plt.clf()
     plt.ylim(0, 25)
-    plt.ylabel("intensity [dB]")
-    plt.plot(xaxis, harmonic_values)
+    plt.ylabel("Intensity (dB)")
+    plt.xlabel("Time (s)")
+    plt.plot(xaxis, harmonic_values, color='pink')
+    plt.title(filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/harmonic_'+filepath.replace('wav', 'png'))
 
 def plot_stats(indicator, name, settings, bins=25):
@@ -74,8 +85,9 @@ def plot_stats(indicator, name, settings, bins=25):
     minv = min(values)
     if minv < 0: minv = 0
     plt.xlim(minv, max(values))
-    n, bins, _ = plt.hist(values, bins='auto', normed=1)
+    n, bins, _ = plt.hist(values, bins='auto', normed=1, color='blue')
     plt.ylim(0, max(n))
+    plt.title(settings.title)
     # Mean line
     values = [x for x in indicator if x > 0]
     plt.axvline(np.nanmean(values), color='k', linestyle='dashed', linewidth=1)
