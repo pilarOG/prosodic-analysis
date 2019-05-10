@@ -22,7 +22,19 @@ To use the script you only need to modify the config.cfg file. This file contain
 python analyse.py -c config.cfg
 ```
 
-The script runs 4 kinds of analysis (which can be turned on or off in the config file): pitch, duration (of speech and pauses seprately), intensity and harmonic-to-noise ratio.
+The script runs 4 kinds of analysis (which can be turned on or off in the config file): pitch, duration (of speech and pauses separately), intensity and harmonic-to-noise ratio.
+Make sure to change the path to your wave folder correctly in the config file. You also need to create a folder to save the plots and add the path in the same config file. Change the "title" field to name your corpus. These are the only things you might need to change for a new corpora. If you have a good idea about the range of pitch of your speaker you can change here, as well as the amount of smoothing of the F0 and other parameters.
+
+```bash
+# Waveforms path: path to the folder with .wav files, the script will only run in files with that extension
+
+corpora = 'wavs_lj'
+
+# Path to the folder Where to save plots
+
+save_plots = 'plots_lj'
+title = 'LJ'
+```
 
 # Output
 
