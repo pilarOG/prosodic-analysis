@@ -36,7 +36,10 @@ For each sentence, the outputs are:
 - HNR (in dB) plots for each sentence.
 
 This is an example of the mentioned plots for one sentence in the LJ dataset.
-![Alt text](plots/f0_LJ050-0008.png?raw=true)
+
+![](plots/f0_LJ050-0008.png)  |  ![](plots/harmonic_LJ050-0008.png)
+:-------------------------:|:-------------------------:
+![](plots/intens_LJ050-0008.png)  |  ![](plots/zcoef_LJ050-0008.png)
 
 For the corpora, the outputs are:
 - Normalized histogram of the distribution of fundamental frequency (in Hz) values.
