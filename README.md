@@ -52,6 +52,7 @@ For the corpora, the outputs are:
 These plots might allow a quick comparison between two corpora. For example, here there is a comparison of the general stats of 300 sentences from LJ-speech and 278 sentences (chapter 50) by me (Chilean Spanish plots). Although the number of sentences is similar, the distribution of durations is quite different, although LJ sentences come from audiobook data they had been chunked at silences and other boundaries, while my are prompts designed for unit selection TTS, without particularly controlling for length. Also, although both are females, my speech was intended to be neutral, while LJ is more expressive, which can be seen in the distribution of fundamental frequency and higher intensities. Finally, LJ is an American English speaker, while I'm a Chilean Spanish speaker (Please note the range of the axis differs for the two corpora).
 
 ![](plots/chilean_stats_Duration.png)  |  ![](plots/LJ_stats_Duration.png)
+:-------------------------:|:-------------------------:
 ![](plots/chilean_stats_Fundamental.png)  |  ![](plots/LJ_stats_Fundamental.png)
 ![](plots/chilean_stats_Intensity.png)  |  ![](plots/LJ_stats_Intensity.png)
 ![](plots/chilean_stats_Silence.png)  |  ![](plots/LJ_stats_Silence.png)
