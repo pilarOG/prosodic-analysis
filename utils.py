@@ -41,14 +41,14 @@ def extract_harmonics(waveform):
 # From original https://github.com/YannickJadoul/Parselmouth
 def draw_pitch(pitch, smoothed, interpolated, xaxis, settings, filepath):
     plt.clf()
-    plt.ylim(0, settings.pitch_ceiling)
+    plt.ylim(settings.pitch_floor, settings.pitch_ceiling)
     plt.ylabel("Fundamental Frequency (Hz)")
     plt.xlabel("Time (s)")
     plt.plot(xaxis, pitch, color='red', label='pitch')
     plt.plot(xaxis, interpolated, color='purple', label='interpolated', alpha=0.5)
     plt.plot(xaxis, smoothed, color='blue', label='smoothed')
     plt.legend()
-    plt.title(filepath.replace('.wav', ''))
+    plt.title('Pitch '+filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/f0_'+filepath.replace('wav', 'png'))
 
 def draw_intens(intens_values, xaxis, settings, filepath):
@@ -57,7 +57,7 @@ def draw_intens(intens_values, xaxis, settings, filepath):
     plt.ylabel("Intensity (dB)")
     plt.xlabel("Time (s)")
     plt.plot(xaxis, intens_values, color='red')
-    plt.title(filepath.replace('.wav', ''))
+    plt.title('Intensity '+filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/intens_'+filepath.replace('wav', 'png'))
 
 def draw_zcoef(coef_values, xaxis_len, settings, filepath):
@@ -66,7 +66,7 @@ def draw_zcoef(coef_values, xaxis_len, settings, filepath):
     plt.ylabel("Zero Coefficient")
     plt.xlabel("Frames")
     plt.plot(range(0, xaxis_len), coef_values, color='orange')
-    plt.title(filepath.replace('.wav', ''))
+    plt.title('Power '+filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/zcoef_'+filepath.replace('wav', 'png'))
 
 def draw_harmonic(harmonic_values, xaxis, settings, filepath):
@@ -75,7 +75,7 @@ def draw_harmonic(harmonic_values, xaxis, settings, filepath):
     plt.ylabel("Intensity (dB)")
     plt.xlabel("Time (s)")
     plt.plot(xaxis, harmonic_values, color='pink')
-    plt.title(filepath.replace('.wav', ''))
+    plt.title('HNR '+filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/harmonic_'+filepath.replace('wav', 'png'))
 
 def plot_stats(indicator, name, settings, bins=25):
