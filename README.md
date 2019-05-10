@@ -27,13 +27,19 @@ python analyse.py -c config.cfg
 The script runs 4 kinds of analysis (which can be turned on or off in the config file): pitch, duration (of speech and pauses seprately), intensity and harmonic-to-noise ratio.
 Analysis are run both for each sentence and for the whole corpora.
 
+One of the datasets I will use here to examplify is the LJ dataset that you can find here: https://keithito.com/LJ-Speech-Dataset/
+
 For each sentence, the outputs are:
-- Fundamental frequency contour (in Hz) plots for each sentence.
-- Fundamental frequency contour interpolated (in Hz) plots for each sentence.
-- Fundamental frequency contour smoothed (in Hz) plots for each sentence.
+- Fundamental frequency contour (in Hz) of pitch, interpolated and smoothed contour plot for each sentence.
 - Intensity contour (in dB) plots for each sentence.
 - Zero coefficient plots for each sentence.
 - HNR (in dB) plots for each sentence.
+
+This is an example of the mentioned plots for one sentence in the LJ dataset.
+
+![](plots/f0_LJ050-0008.png)  |  ![](plots/harmonic_LJ050-0008.png)
+:-------------------------:|:-------------------------:
+![](plots/intens_LJ050-0008.png)  |  ![](plots/zcoef_LJ050-0008.png)
 
 For the corpora, the outputs are:
 - Normalized histogram of the distribution of fundamental frequency (in Hz) values.
