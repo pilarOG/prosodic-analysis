@@ -15,6 +15,8 @@ from tqdm import tqdm
 perc_voiced, pitch_values, silence_values, harmonic_values = [], [], [], [] # Only leave those we'll use for stats
 intens_values, zcoef_values, duration_values = [], [], []
 
+speakers = []
+
 class ProsodicAnalysis():
 
     def __init__(self, waveform, settings, filepath):
@@ -82,9 +84,10 @@ opts = a.parse_args()
 settings = load_config(opts.config)
 
 # Analysis of each sample
-for filepath in tqdm(os.listdir(settings.corpora)):
+for filepath in tqdm(sorted(os.listdir(settings.corpora))):
+    print filepath
     if '.wav' in filepath:
-
+        print filepath
         wav = load_wave(settings.corpora+'/'+filepath)
         analysis = ProsodicAnalysis(wav, settings, filepath)
 
@@ -101,16 +104,38 @@ for filepath in tqdm(os.listdir(settings.corpora)):
         if settings.analyse_voc:
             analysis.set_harmonic_analysis(extract_harmonics(analysis.wav))
 
+        if settings.speaker_labels:
+            [speakers.append(label) for label in settings.speaker_labels if filepath.startswith(label)]
+
 # Plot corpus stats
-plot_stats(list(np.concatenate(pitch_values)), 'Fundamental frequency (Hz)', settings)
-plot_stats(list(np.concatenate(intens_values)), 'Intensity (dB)', settings) # Concatenate values of all samples
-plot_stats(duration_values, 'Duration (s)', settings)
-plot_stats(silence_values, 'Silence (s)', settings)
-plot_stats(list(np.concatenate(harmonic_values)), 'HNR (dB)', settings)
+
+if settings.speaker_labels == []:
+    if settings.analyse_f0: plot_stats(list(np.concatenate(pitch_values)), 'Fundamental frequency (Hz)', settings)
+    if settings.analyse_int: plot_stats(list(np.concatenate(intens_values)), 'Intensity (dB)', settings) # Concatenate values of all samples
+    if settings.analyse_dur: plot_stats(duration_values, 'Duration (s)', settings)
+    if settings.analyse_dur: plot_stats(silence_values, 'Silence (s)', settings)
+    if settings.analyse_voc: plot_stats(list(np.concatenate(harmonic_values)), 'HNR (dB)', settings)
+else:
+    for speak in set(speakers):
+        speaker_f0_values, speaker_int_values, speaker_dur_values, speaker_sil_values, speaker_har_values = [], [], [], [], []
+        for n in range(0, len(speakers)):
+            if speakers[n] == speak:
+                if settings.analyse_f0: speaker_f0_values.append(pitch_values[n])
+                if settings.analyse_int: speaker_int_values.append(intens_values[n])
+                if settings.analyse_dur: speaker_dur_values.append(duration_values[n])
+                if settings.analyse_dur: speaker_sil_values.append(silence_values[n])
+                if settings.analyse_voc: speaker_har_values.append(harmonic_values[n])
+        if settings.analyse_f0: plot_stats(list(np.concatenate(speaker_f0_values)), 'Fundamental frequency (Hz)', settings, speak)
+        if settings.analyse_int: plot_stats(list(np.concatenate(speaker_int_values)), 'Intensity (dB)', settings, speak) # Concatenate values of all samples
+        if settings.analyse_dur: plot_stats(speaker_dur_values, 'Duration (s)', settings, speak)
+        if settings.analyse_dur: plot_stats(speaker_sil_values, 'Silence (s)', settings, speak)
+        if settings.analyse_voc: plot_stats(list(np.concatenate(speaker_har_values)), 'HNR (dB)', settings, speak)
+
+
+
 
 #TODO: extra information
 # Future extra options:
 # 1) Include gender information
 # 2) Include alignments
-# 3) Include speaker labels
 # 4) Include through time analysis

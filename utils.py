@@ -20,6 +20,8 @@ def extract_mfccs(waveform, settings):
     zero_coefs = []
     fs = waveform[0]
     x = waveform[1]
+    if len(x.shape) > 1 and x.shape[1] == 2:
+        x = x[:, 0]
     for pos in range(0, len(x)-settings.frame_length, settings.frame_length):
         xw = x[pos:pos+settings.frame_length] * pysptk.blackman(settings.frame_length)
         zero_coefs.append(pysptk.sptk.mfcc(xw, fs=fs, order=14, czero=True)[-1])
@@ -84,7 +86,7 @@ def draw_harmonic(harmonic_values, xaxis, settings, filepath):
     plt.title('HNR '+filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/harmonic_'+filepath.replace('wav', 'png'))
 
-def plot_stats(indicator, name, settings, bins=25):
+def plot_stats(indicator, name, settings, speaker=None, bins=25):
     plt.clf()
     values = [x for x in indicator if ~np.isnan(x)]
     # Plot histogram
@@ -93,7 +95,8 @@ def plot_stats(indicator, name, settings, bins=25):
     plt.xlim(minv, max(values))
     n, bins, _ = plt.hist(values, bins='auto', normed=1, color='blue')
     plt.ylim(0, max(n))
-    plt.title(settings.title)
+    if speaker: plt.title(settings.title+' '+speaker)
+    else: plt.title(settings.title)
     # Mean line
     values = [x for x in indicator if x > 0]
     plt.axvline(np.nanmean(values), color='k', linestyle='dashed', linewidth=1)
@@ -103,4 +106,5 @@ def plot_stats(indicator, name, settings, bins=25):
     y = mlab.normpdf(bins, np.nanmean(values), np.nanstd(values))
     plt.plot(bins, y, 'r--')
     # Save plot
-    plt.savefig(settings.save_plots+'/'+settings.title+'_stats_'+name.split()[0]+'.png')
+    if speaker: plt.savefig(settings.save_plots+'/'+settings.title+'_'+speaker+'_stats_'+name.split()[0]+'.png')
+    else: plt.savefig(settings.save_plots+'/'+settings.title+'_stats_'+name.split()[0]+'.png')
