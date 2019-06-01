@@ -86,7 +86,7 @@ def draw_harmonic(harmonic_values, xaxis, settings, filepath):
     plt.title('HNR '+filepath.replace('.wav', ''))
     plt.savefig(settings.save_plots+'/harmonic_'+filepath.replace('wav', 'png'))
 
-def plot_stats(indicator, name, settings, speaker=None, bins=25):
+def plot_stats(indicator, name, settings, category=None, bins=25): #TODO: add N to figure
     plt.clf()
     values = [x for x in indicator if ~np.isnan(x)]
     # Plot histogram
@@ -94,8 +94,8 @@ def plot_stats(indicator, name, settings, speaker=None, bins=25):
     if minv < 0: minv = 0
     plt.xlim(minv, max(values))
     n, bins, _ = plt.hist(values, bins='auto', normed=1, color='blue')
-    plt.ylim(0, max(n))
-    if speaker: plt.title(settings.title+' '+speaker)
+    plt.ylim(0, 0.1) # adjust for visualization
+    if category: plt.title(settings.title+' '+category)
     else: plt.title(settings.title)
     # Mean line
     values = [x for x in indicator if x > 0]
@@ -106,5 +106,5 @@ def plot_stats(indicator, name, settings, speaker=None, bins=25):
     y = mlab.normpdf(bins, np.nanmean(values), np.nanstd(values))
     plt.plot(bins, y, 'r--')
     # Save plot
-    if speaker: plt.savefig(settings.save_plots+'/'+settings.title+'_'+speaker+'_stats_'+name.split()[0]+'.png')
+    if category: plt.savefig(settings.save_plots+'/'+settings.title+'_'+category+'_stats_'+name.split()[0]+'.png')
     else: plt.savefig(settings.save_plots+'/'+settings.title+'_stats_'+name.split()[0]+'.png')

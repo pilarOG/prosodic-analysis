@@ -15,7 +15,7 @@ from tqdm import tqdm
 perc_voiced, pitch_values, silence_values, harmonic_values = [], [], [], [] # Only leave those we'll use for stats
 intens_values, zcoef_values, duration_values = [], [], []
 
-speakers = []
+speakers, genders = [], []
 
 class ProsodicAnalysis():
 
@@ -85,11 +85,15 @@ settings = load_config(opts.config)
 
 # Analysis of each sample
 for filepath in tqdm(sorted(os.listdir(settings.corpora))):
-    print filepath
     if '.wav' in filepath:
-        print filepath
         wav = load_wave(settings.corpora+'/'+filepath)
         analysis = ProsodicAnalysis(wav, settings, filepath)
+
+        if settings.speaker_labels:
+            [speakers.append(label) for label in settings.speaker_labels if filepath.startswith(label)]
+
+        if settings.gender_labels and settings.speaker_labels:
+            [genders.append(settings.gender_labels[n]) for n in range(0, len(settings.speaker_labels)) if filepath.startswith(settings.speaker_labels[n])]
 
         if settings.analyse_f0: #TODO: give a choice about pitch tracker, or to use them all, compare them, and maybe tell the best one for that data
             analysis.set_pitch_analysis(extract_pitch(analysis.wav, settings))
@@ -104,11 +108,9 @@ for filepath in tqdm(sorted(os.listdir(settings.corpora))):
         if settings.analyse_voc:
             analysis.set_harmonic_analysis(extract_harmonics(analysis.wav))
 
-        if settings.speaker_labels:
-            [speakers.append(label) for label in settings.speaker_labels if filepath.startswith(label)]
-
 # Plot corpus stats
 
+ # If we are simply plotting for the whole corpus
 if settings.speaker_labels == []:
     if settings.analyse_f0: plot_stats(list(np.concatenate(pitch_values)), 'Fundamental frequency (Hz)', settings)
     if settings.analyse_int: plot_stats(list(np.concatenate(intens_values)), 'Intensity (dB)', settings) # Concatenate values of all samples
@@ -116,6 +118,7 @@ if settings.speaker_labels == []:
     if settings.analyse_dur: plot_stats(silence_values, 'Silence (s)', settings)
     if settings.analyse_voc: plot_stats(list(np.concatenate(harmonic_values)), 'HNR (dB)', settings)
 else:
+# If we are plotting by speaker
     for speak in set(speakers):
         speaker_f0_values, speaker_int_values, speaker_dur_values, speaker_sil_values, speaker_har_values = [], [], [], [], []
         for n in range(0, len(speakers)):
@@ -131,11 +134,26 @@ else:
         if settings.analyse_dur: plot_stats(speaker_sil_values, 'Silence (s)', settings, speak)
         if settings.analyse_voc: plot_stats(list(np.concatenate(speaker_har_values)), 'HNR (dB)', settings, speak)
 
+# If we are plotting by gender
+if settings.speaker_labels and settings.gender_labels:
+    for gen in set(genders):
+        gender_f0_values, gender_int_values, gender_dur_values, gender_sil_values, gender_har_values = [], [], [], [], []
+        for n in range(0, len(genders)):
+            if genders[n] == gen:
+                if settings.analyse_f0: gender_f0_values.append(pitch_values[n])
+                if settings.analyse_int: gender_int_values.append(intens_values[n])
+                if settings.analyse_dur: gender_dur_values.append(duration_values[n])
+                if settings.analyse_dur: gender_sil_values.append(silence_values[n])
+                if settings.analyse_voc: gender_har_values.append(harmonic_values[n])
+        if settings.analyse_f0: plot_stats(list(np.concatenate(gender_f0_values)), 'Fundamental frequency (Hz)', settings, gen)
+        if settings.analyse_int: plot_stats(list(np.concatenate(gender_int_values)), 'Intensity (dB)', settings, gen) # Concatenate values of all samples
+        if settings.analyse_dur: plot_stats(gender_dur_values, 'Duration (s)', settings, gen)
+        if settings.analyse_dur: plot_stats(gender_sil_values, 'Silence (s)', settings, gen)
+        if settings.analyse_voc: plot_stats(list(np.concatenate(gender_har_values)), 'HNR (dB)', settings, gen)
 
 
 
 #TODO: extra information
 # Future extra options:
-# 1) Include gender information
-# 2) Include alignments
+# 2) Include vowel detection model
 # 4) Include through time analysis
