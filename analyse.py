@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from configuration import load_config
 from data_load import load_wave
-from utils import extract_pitch, extract_intensity, extract_mfccs, extract_intervals, extract_harmonics, draw_pitch, draw_intens, draw_harmonic, draw_zcoef, plot_stats
+from utils import extract_pitch, extract_intensity, extract_mfccs, extract_intervals, extract_harmonics, draw_pitch, draw_intens, draw_harmonic, draw_zcoef, plot_stats, plot_over_time
 import numpy as np
 import os
 import pysptk
@@ -15,7 +15,7 @@ from tqdm import tqdm
 perc_voiced, pitch_values, silence_values, harmonic_values = [], [], [], [] # Only leave those we'll use for stats
 intens_values, zcoef_values, duration_values = [], [], []
 
-speakers, genders = [], []
+speakers, genders, orders = [], [], []
 
 class ProsodicAnalysis():
 
@@ -89,6 +89,9 @@ for filepath in tqdm(sorted(os.listdir(settings.corpora))):
         wav = load_wave(settings.corpora+'/'+filepath)
         analysis = ProsodicAnalysis(wav, settings, filepath)
 
+        if settings.order_labels:
+            orders.append(int(filepath.replace('.wav', '').split(settings.separator)[settings.order_labels-1]))
+
         if settings.speaker_labels:
             [speakers.append(label) for label in settings.speaker_labels if filepath.startswith(label)]
 
@@ -110,8 +113,17 @@ for filepath in tqdm(sorted(os.listdir(settings.corpora))):
 
 # Plot corpus stats
 
+
+if settings.order_labels:
+    if settings.analyse_f0: plot_over_time(orders, pitch_values, 'Fundamental frequency (Hz)', settings)
+    if settings.analyse_int: plot_over_time(orders, intens_values, 'Intensity (dB)', settings)
+    if settings.analyse_dur: plot_over_time(orders, duration_values, 'Duration (s)', settings)
+    if settings.analyse_dur: plot_over_time(orders, silence_values, 'Silence (s)', settings)
+    if settings.analyse_voc: plot_over_time(orders, harmonic_values, 'HNR (dB)', settings)
+
  # If we are simply plotting for the whole corpus
-if settings.speaker_labels == []:
+
+elif settings.speaker_labels == []:
     if settings.analyse_f0: plot_stats(list(np.concatenate(pitch_values)), 'Fundamental frequency (Hz)', settings)
     if settings.analyse_int: plot_stats(list(np.concatenate(intens_values)), 'Intensity (dB)', settings) # Concatenate values of all samples
     if settings.analyse_dur: plot_stats(duration_values, 'Duration (s)', settings)

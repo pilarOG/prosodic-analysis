@@ -108,3 +108,51 @@ def plot_stats(indicator, name, settings, category=None, bins=25): #TODO: add N 
     # Save plot
     if category: plt.savefig(settings.save_plots+'/'+settings.title+'_'+category+'_stats_'+name.split()[0]+'.png')
     else: plt.savefig(settings.save_plots+'/'+settings.title+'_stats_'+name.split()[0]+'.png')
+
+
+def plot_over_time(orders, indicator, measure, settings):
+    prev_order = 0
+    mean = 0
+    mins = 0
+    maxs = 0
+    all_means = []
+    all_maxs = []
+    all_mins = []
+    # Match over time with the different time bins
+    for value in range(0, len(orders)):
+
+        if orders[value] != prev_order:
+            if measure == 'Duration (s)' or measure == 'Silence (s)':
+                all_means.append(mean)
+                mean = indicator[value]
+
+            else:
+                all_means.append(mean)
+                all_mins.append(mins)
+                all_maxs.append(maxs)
+
+                mean = np.nanmean([x for x in indicator[value] if ~np.isnan(x)])
+                mins = min([x for x in indicator[value] if ~np.isnan(x)])
+                maxs = max([x for x in indicator[value] if ~np.isnan(x)])
+
+            prev_order = orders[value]
+        else:
+            if measure == 'Duration (s)' or measure == 'Silence (s)':
+                mean = (indicator[value] + mean) // 2
+            else:
+                mean = (np.nanmean([x for x in indicator[value] if ~np.isnan(x)]) + mean) // 2
+                mins = (min([x for x in indicator[value] if ~np.isnan(x)]) + mins) // 2
+                maxs = (max([x for x in indicator[value] if ~np.isnan(x)]) + maxs) // 2
+
+    # Plot
+    plt.clf()
+    plt.ylabel(measure)
+    plt.xlabel(settings.order_name)
+    if measure == 'Duration (s)' or measure == 'Silence (s)':
+        plt.plot(all_means)
+    else:
+        plt.plot(all_means)
+        plt.plot(all_mins)
+        plt.plot(all_maxs)
+    # Save plot
+    plt.savefig(settings.save_plots+'/'+settings.title+'_time_stat_'+measure.split()[0]+'.png')
